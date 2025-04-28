@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature Image Slider</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f7f4;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            padding: 0; /* Removed padding to reach edges */
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px; /* Added padding instead of margin */
+            background-color: #f0f7f4;
+        }
+        
+        h1 {
+            color: #2c6e49;
+            margin-bottom: 10px;
+        }
+        
+        /* Menu Bar Styles */
+        .menu-bar {
+            display: flex;
+            justify-content: center;
+            background-color: #f9f9f9;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .menu-item {
+            padding: 8px 20px;
+            margin: 0 5px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin: 0 5px;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            left: 0;
+        }
+        
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        /* Original Slider Styles */
+        .slider-container {
+            position: relative;
+            width: 100%; /* Full width */
+            overflow: hidden;
+            border-radius: 0; /* Remove border radius for edge-to-edge */
+            box-shadow: none; /* Optional: remove shadow for cleaner edge look */
+        }
+        
+        .slider {
+            display: flex;
+            width: 100%;
+            height: 500px; /* You can adjust this height */
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .slide {
+            flex: 0 0 100%;
+            position: relative;
+            height: 500px;
+            width: 100%;
+        }
+        
+        .slide svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            transform: translateY(-50%);
+            padding: 0 15px;
+            z-index: 10;
+        }
+        
+        .prev, .next {
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #333;
+            border: none;
+            font-size: 24px;
+            padding: 10px 15px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .prev:hover, .next:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .dot-container {
+            text-align: center;
+            padding: 20px 0; /* Changed from margin to padding */
+            background-color: #f0f7f4;
+        }
+        
+        .dot {
+            cursor: pointer;
+            height: 12px;
+            width: 12px;
+            margin: 0 5px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        
+        .active, .dot:hover {
+            background-color: #2c6e49;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px; /* Changed from margin to padding */
+            color: #666;
+            font-size: 14px;
+            background-color: #f0f7f4;
+        }
+
+        /* Floating AV1 Icon Styles */
+.floating-image {
+    position: fixed;
+    width: 170px;
+    height: 100px;
+    z-index: 1000;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    animation: float 60s linear infinite; /* Changed to 60s and kept linear timing */
+}
+
+.floating-image:hover {
+    transform: scale(1.1);
+}
+
+/* Simplified keyframe path for more constant movement */
+@keyframes float {
+    0% {
+        top: 20%;
+        left: 20%;
+    }
+    25% {
+        top: 20%;
+        left: 70%;
+    }
+    50% {
+        top: 70%;
+        left: 70%;
+    }
+    75% {
+        top: 70%;
+        left: 20%;
+    }
+    100% {
+        top: 20%;
+        left: 20%;
+    }
+}
+
+        /* X Button Styles */
+        .close-button {
+            position: absolute;
+            bottom: -20px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        @keyframes float {
+            0% {
+                top: 20%;
+                left: 10%;
+            }
+            25% {
+                top: 30%;
+                left: 80%;
+            }
+            50% {
+                top: 70%;
+                left: 70%;
+            }
+            75% {
+                top: 60%;
+                left: 20%;
+            }
+            100% {
+                top: 20%;
+                left: 10%;
+            }
+        }
+
+        /* Welcome Page Styles */
+        .welcome-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .welcome-content {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            max-width: 80%;
+        }
+
+        .welcome-content h2 {
+            font-size: 36px;
+            color: #2c6e49;
+            margin-bottom: 20px;
+        }
+
+        .welcome-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Floating AV1 TV Icon -->
+        <div class="floating-image" id="floatingAv1">
+            <div class="close-button" id="closeButton">X</div>
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- TV Shape -->
+                <rect x="10" y="10" width="80" height="60" rx="5" fill="#333" />
+                <rect x="15" y="15" width="70" height="45" rx="2" fill="#6ab7ff" />
+                
+                <!-- TV Stand -->
+                <rect x="35" y="70" width="30" height="10" fill="#555" />
+                <rect x="25" y="80" width="50" height="5" rx="2" fill="#333" />
+                
+                <!-- AV1 Text -->
+                <text x="50" y="45" font-family="Arial" font-size="16" font-weight="bold" fill="white" text-anchor="middle">AV1</text>
+                
+                <!-- Antenna -->
+                <line x1="30" y1="10" x2="20" y2="-5" stroke="#777" stroke-width="2" />
+                <line x1="70" y1="10" x2="80" y2="-5" stroke="#777" stroke-width="2" />
+                <circle cx="20" cy="-5" r="2" fill="#999" />
+                <circle cx="80" cy="-5" r="2" fill="#999" />
+            </svg>
+        </div>
+
+        <!-- Welcome Page that appears when clicking the floating icon -->
+        <div class="welcome-page" id="welcomePage">
+            <div class="welcome-content">
+                <span class="welcome-close" id="welcomeClose">&times;</span>
+                <h2>Welcome</h2>
+            </div>
+        </div>
+
+        <header>
+            <h1>Nature's Beauty</h1>
+            <p>A collection of stunning landscapes from around the world</p>
+        </header>
+        
+        <!-- Expanded Menu Bar with Dropdowns for All Items -->
+        <div class="menu-bar">
+            <div class="dropdown">
+                <div class="menu-item">Mountain Vista</div>
+                <div class="dropdown-content">
+                    <a href="#">Select the correct term:</a>
+                    <a href="#">Peak</a>
+                    <a href="#">Ridge</a>
+                    <a href="#">Summit</a>
+                    <a href="#">Range</a>
+                </div>
+            </div>
+            
+            <div class="dropdown">
+                <div class="menu-item">Forest Haven</div>
+                <div class="dropdown-content">
+                    <a href="#">Select the correct term:</a>
+                    <a href="#">Canopy</a>
+                    <a href="#">Grove</a>
+                    <a href="#">Woodland</a>
+                    <a href="#">Evergreen</a>
+                </div>
+            </div>
+            
+            <div class="dropdown">
+                <div class="menu-item">Desert Glow</div>
+                <div class="dropdown-content">
+                    <a href="#">Select the correct term:</a>
+                    <a href="#">River</a>
+                    <a href="#">Plain</a>
+                    <a href="#">Valley</a>
+                    <a href="#">Desert</a>
+                </div>
+            </div>
+            
+            <div class="dropdown">
+                <div class="menu-item">Ocean Breeze</div>
+                <div class="dropdown-content">
+                    <a href="#">Select the correct term:</a>
+                    <a href="#">Coast</a>
+                    <a href="#">Shore</a>
+                    <a href="#">Beach</a>
+                    <a href="#">Bay</a>
+                </div>
+            </div>
+            
+            <div class="dropdown">
+                <div class="menu-item">City Lights</div>
+                <div class="dropdown-content">
+                    <a href="#">Select the correct term:</a>
+                    <a href="#">Skyline</a>
+                    <a href="#">Downtown</a>
+                    <a href="#">Metropolis</a>
+                    <a href="#">Urban</a>
+                </div>
+            </div>
+            
+            <div class="dropdown">
+                <div class="menu-item">Sky Horizon</div>
+                <div class="dropdown-content">
+                    <a href="#">Select the correct term:</a>
+                    <a href="#">Sunset</a>
+                    <a href="#">Sunrise</a>
+                    <a href="#">Dusk</a>
+                    <a href="#">Dawn</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider">
+                <div class="slide">
+                    <!-- Forest SVG (unchanged) -->
+                    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <rect width="800" height="500" fill="#87CEEB"/>
+                        <rect width="800" height="250" y="250" fill="#228B22"/>
+                        <circle cx="100" cy="100" r="50" fill="#FFD700"/>
+                        <!-- Trees -->
+                        <g transform="translate(100, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                        <g transform="translate(200, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                        <g transform="translate(300, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                        <g transform="translate(400, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                        <g transform="translate(500, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                        <g transform="translate(600, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                        <g transform="translate(700, 250)">
+                            <rect x="-10" y="0" width="20" height="100" fill="#8B4513"/>
+                            <polygon points="-50,0 50,0 0,-100" fill="#006400"/>
+                            <polygon points="-40,-40 40,-40 0,-120" fill="#006400"/>
+                        </g>
+                    </svg>
+                    <div class="caption">Lush Green Forest</div>
+                </div>
+                <div class="slide">
+                    <!-- Mountain SVG (unchanged) -->
+                    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <rect width="800" height="500" fill="#87CEEB"/>
+                        <polygon points="0,500 0,300 200,100 400,300 600,150 800,300 800,500" fill="#A9A9A9"/>
+                        <polygon points="200,100 300,200 100,200" fill="#FFFFFF"/>
+                        <polygon points="600,150 650,200 550,200" fill="#FFFFFF"/>
+                        <circle cx="700" cy="100" r="50" fill="#FFD700"/>
+                        <rect width="800" height="50" y="450" fill="#228B22"/>
+                    </svg>
+                    <div class="caption">Majestic Mountain Range</div>
+                </div>
+                <div class="slide">
+                    <!-- Beach SVG (unchanged) -->
+                    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <rect width="800" height="300" fill="#87CEEB"/>
+                        <rect width="800" height="200" y="300" fill="#F5DEB3"/>
+                        <circle cx="650" cy="100" r="60" fill="#FF8C00"/>
+                        <path d="M0,300 Q400,200 800,300" fill="#4169E1" />
+                        <path d="M0,320 Q400,220 800,320" fill="#4169E1" />
+                        <path d="M0,340 Q400,240 800,340" fill="#4169E1" />
+                        <!-- Palm Tree -->
+                        <rect x="150" y="250" width="15" height="80" fill="#8B4513" />
+                        <path d="M157,250 C180,210 200,230 190,260" fill="#228B22" />
+                        <path d="M157,250 C130,220 120,240 130,260" fill="#228B22" />
+                        <path d="M157,250 C157,200 180,220 170,260" fill="#228B22" />
+                        <!-- Beach umbrella -->
+                        <line x1="600" y1="350" x2="600" y2="400" stroke="#8B4513" stroke-width="5" />
+                        <path d="M550,350 Q600,320 650,350" fill="#FF6347" />
+                    </svg>
+                    <div class="caption">Serene Beach Sunset</div>
+                </div>
+                <div class="slide">
+                    <!-- Waterfall SVG (unchanged) -->
+                    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <rect width="800" height="500" fill="#87CEEB"/>
+                        <circle cx="100" cy="100" r="50" fill="#FFD700"/>
+                        <!-- Mountains -->
+                        <polygon points="0,500 0,200 200,300 400,150 600,250 800,100 800,500" fill="#A9A9A9"/>
+                        <!-- Waterfall -->
+                        <rect x="380" y="150" width="40" height="350" fill="#ADD8E6"/>
+                        <path d="M380,150 Q400,180 420,150" fill="#ADD8E6" />
+                        <path d="M380,200 Q400,230 420,200" fill="#FFFFFF" opacity="0.5" />
+                        <path d="M380,250 Q400,280 420,250" fill="#FFFFFF" opacity="0.5" />
+                        <path d="M380,300 Q400,330 420,300" fill="#FFFFFF" opacity="0.5" />
+                        <path d="M380,350 Q400,380 420,350" fill="#FFFFFF" opacity="0.5" />
+                        <!-- Water pool -->
+                        <ellipse cx="400" cy="480" rx="100" ry="20" fill="#ADD8E6"/>
+                    </svg>
+                    <div class="caption">Powerful Waterfall</div>
+                </div>
+                <div class="slide">
+                    <!-- Desert SVG (unchanged) -->
+                    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <rect width="800" height="500" fill="#87CEEB"/>
+                        <rect width="800" height="300" y="200" fill="#F4A460"/>
+                        <circle cx="650" cy="100" r="60" fill="#FF8C00"/>
+                        <!-- Sand dunes -->
+                        <path d="M0,300 Q200,250 400,300 Q600,350 800,300" fill="#DAA520" />
+                        <path d="M0,350 Q200,400 400,350 Q600,300 800,350" fill="#DAA520" />
+                        <!-- Cactus -->
+                        <rect x="200" y="200" width="15" height="80" fill="#006400" />
+                        <rect x="185" y="230" width="15" height="30" fill="#006400" />
+                        <rect x="215" y="250" width="15" height="30" fill="#006400" />
+                    </svg>
+                    <div class="caption">Vibrant Desert Sands</div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="prev">❮</button>
+                <button class="next">❯</button>
+            </div>
+        </div>
+        
+        <div class="dot-container">
+            <span class="dot active" onclick="currentSlide(0)"></span>
+            <span class="dot" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+            <span class="dot" onclick="currentSlide(4)"></span>
+        </div>
+        
+        <footer>
+            <p>© 2025 Nature's Beauty Gallery</p>
+        </footer>
+    </div>
+    
+    <script>
+        let currentIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const slider = document.querySelector('.slider');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = slides.length;
+        let slideInterval;
+        
+        // Initialize the slider
+        updateSlider();
+        startSlideTimer();
+        
+        // Event listeners for navigation buttons
+        document.querySelector('.prev').addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+            updateSlider();
+            resetTimer();
+        });
+        
+        document.querySelector('.next').addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            updateSlider();
+            resetTimer();
+        });
+        
+        // Menu item navigation - selecting parent menu items
+        const menuItems = document.querySelectorAll('.dropdown .menu-item');
+        menuItems.forEach((item, index) => {
+            if (index < totalSlides) {
+                item.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateSlider();
+                    resetTimer();
+                });
+            }
+        });
+        
+        // Handle dropdown menu item clicks
+        const dropdownLinks = document.querySelectorAll('.dropdown-content a');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default anchor behavior
+                // Additional functionality could be added here
+            });
+        });
+        
+        // Function to update the slider position
+        function updateSlider() {
+            slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            // Update active dot
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+        
+        // Function to handle dot navigation
+        function currentSlide(index) {
+            currentIndex = index;
+            updateSlider();
+            resetTimer();
+        }
+        
+        // Function to start the automatic slideshow
+        function startSlideTimer() {
+            slideInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSlider();
+            }, 6000); // Change slide every 6 seconds
+        }
+        
+        // Function to reset the timer when manual navigation occurs
+        function resetTimer() {
+            clearInterval(slideInterval);
+            startSlideTimer();
+        }
+
+        // Floating AV1 TV functionality
+        const floatingAv1 = document.getElementById('floatingAv1');
+        const closeButton = document.getElementById('closeButton');
+        const welcomePage = document.getElementById('welcomePage');
+        const welcomeClose = document.getElementById('welcomeClose');
+        
+        // When the floating image is clicked, show the welcome page
+        floatingAv1.addEventListener('click', function(e) {
+            // Check if the click was on the close button to avoid triggering both events
+            if (e.target !== closeButton && !closeButton.contains(e.target)) {
+                welcomePage.style.display = 'flex';
+            }
+        });
+        
+        // When the X button is clicked, make the floating image disappear
+        closeButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent the parent click event from firing
+            floatingAv1.style.display = 'none';
+        });
+        
+        // Close the welcome page when clicking the X
+        welcomeClose.addEventListener('click', function() {
+            welcomePage.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
